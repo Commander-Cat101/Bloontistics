@@ -19,6 +19,7 @@ using Assets.Scripts.Data.MapSets;
 using Assets.Scripts.Unity.UI_New.InGame.Stats;
 using Assets.Scripts.Unity.UI_New.InGame;
 using BTD_Mod_Helper.Extensions;
+using Newtonsoft.Json.Linq;
 
 [assembly: MelonInfo(typeof(Bloontistics.Bloontistics), "Bloontistics", ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
@@ -31,7 +32,35 @@ class Global
 }
 public class Bloontistics : BloonsTD6Mod
 {
-
+    public static readonly ModSettingCategory BloontisticsSettings = new("Showing Stats")
+    {
+        collapsed = false
+    };
+    public static readonly ModSettingBool TotalTowers = new(true)
+    {
+        displayName = "Show Total Towers",
+        category = BloontisticsSettings
+    };
+    public static readonly ModSettingBool TotalProjectiles = new(true)
+    {
+        displayName = "Show Total Projectiles",
+        category = BloontisticsSettings
+    };
+    public static readonly ModSettingBool TotalBloons = new(true)
+    {
+        displayName = "Show Total Bloons",
+        category = BloontisticsSettings
+    };
+    public static readonly ModSettingBool TotalUpgrades = new(true)
+    {
+        displayName = "Show Total Upgrades",
+        category = BloontisticsSettings
+    };
+    public static readonly ModSettingBool MatchTime = new(true)
+    {
+        displayName = "Show Total Match Time",
+        category = BloontisticsSettings
+    };
 }
 [HarmonyPatch(typeof(RoundDisplay), nameof(RoundDisplay.OnUpdate))]
 public sealed class Display
@@ -49,7 +78,8 @@ public sealed class Display
             Global.chosenstat += 1;
             Global.cooldown = 10;
         }
-        string text = "NULL";
+        string text = "No Stat Found";
+        /*
         switch (Global.chosenstat)
         {
             case 0:
@@ -75,6 +105,90 @@ public sealed class Display
                 text = "Total Towers: " + InGame.instance.bridge.GetAllTowers().Count;
                 Global.chosenstat = 0;
                 break;
+        }*/
+        bool towers = Bloontistics.TotalTowers;
+        bool upgrades = Bloontistics.TotalUpgrades;
+        bool bloons = Bloontistics.TotalBloons;
+        bool projectiles = Bloontistics.TotalProjectiles;
+        bool matchtime = Bloontistics.MatchTime;
+        for (int i = 0; i < 2; i++)
+        {
+            if (Global.chosenstat == 0)
+            {
+                if (towers == true)
+                {
+                    text = "Total Towers: " + InGame.instance.bridge.GetAllTowers().Count;
+                }
+                else
+                {
+                    Global.chosenstat++;
+                }
+            }
+            if (Global.chosenstat == 1)
+            {
+                if (projectiles == true)
+                {
+                    text = "Total Projectiles: " + InGame.instance.bridge.GetAllProjectiles().Count;
+                }
+                else
+                {
+                    Global.chosenstat++;
+                }
+
+            }
+            if (Global.chosenstat == 2)
+            {
+                if (upgrades == true)
+                {
+                    int upgradestotal = 0;
+                    foreach (var tower in InGame.instance.bridge.GetAllTowers())
+                    {
+                        upgradestotal += tower.tower.towerModel.GetUpgradeLevel(0);
+                        upgradestotal += tower.tower.towerModel.GetUpgradeLevel(1);
+                        upgradestotal += tower.tower.towerModel.GetUpgradeLevel(2);
+                    }
+                    text = "Total Upgrades: " + upgradestotal;
+                }
+                else
+                {
+                    Global.chosenstat++;
+                }
+            }
+            if (Global.chosenstat == 3)
+            {
+                if (bloons == true)
+                {
+                    text = "Total Bloons: " + InGame.instance.bridge.GetAllBloons().Count;
+                }
+                else
+                {
+                    Global.chosenstat++;
+                }
+            }
+            if (Global.chosenstat == 4)
+            {
+                if (matchtime == true)
+                {
+                    decimal time = InGame.instance.bridge.ElapsedTime / 60;
+                    if (time < 61)
+                    {
+                        text = "Total Match Time: " + (int)time + " Seconds";
+                    }
+                    else
+                    {
+                        int minutes = ((int)time / 60);
+                        text = "Total Match Time: " + minutes + " Minutes and " + ((int)time - (minutes * 60)) + " Seconds";
+                    }
+                }
+                else
+                {
+                    Global.chosenstat++;
+                }
+            }
+            if (Global.chosenstat == 5)
+            {
+                Global.chosenstat = 0;
+            }
         }
         __instance.text.text = $"{__instance.cachedRoundDisp}\n";
         __instance.text.text += text + "\n";
