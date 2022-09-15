@@ -7,6 +7,7 @@ using Assets.Scripts.Unity.UI_New.InGame.Stats;
 using Assets.Scripts.Unity.UI_New.PlayerStats;
 using Bloontistics;
 using BTD_Mod_Helper;
+using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
@@ -48,7 +49,7 @@ public class Bloontistics : BloonsTD6Mod
     };
     public static readonly ModSettingBool HighestRound = new(true)
     {
-        displayName = "Show Cash Gained",
+        displayName = "Show Highest Round",
         category = BloontisticsSettings
     };
     public static readonly ModSettingBool TotalTowers = new(true)
@@ -107,13 +108,26 @@ public class Bloontistics : BloonsTD6Mod
     };
     public static readonly ModSettingBool UseSounds = new(false)
     {
+        
         displayName = "Use custom sound? (.wav file)",
         category = Customization,
+    };
+    public static readonly ModSettingButton TestSound = new(() => PlaySound())
+    {
+        displayName = "",
+        buttonText = "Test Sound",
+        category = Customization,
+        buttonSprite = VanillaSprites.YellowBtnLong
     };
     public static readonly ModSettingFile Sound = new("")
     {
         category = Customization
     };
+    private static void PlaySound()
+    {
+        System.Media.SoundPlayer player = new System.Media.SoundPlayer(Bloontistics.Sound);
+        player.Play();
+    }
     public override void OnApplicationStart()
     {
         if (!Directory.Exists(@"Mods/Sounds/Bloontistics"))
@@ -121,8 +135,10 @@ public class Bloontistics : BloonsTD6Mod
             if (!Directory.Exists(@"Mods/Sounds"))
             {
                 Directory.CreateDirectory(@"Mods/Sounds");
+                MelonLogger.Msg(ConsoleColor.Green, "Created Sound Folder");
             }
             Directory.CreateDirectory(@"Mods/Sounds/Bloontistics");
+            MelonLogger.Msg(ConsoleColor.Green, "Created Bloontistics Sound Folder");
         }
         base.OnApplicationStart();
     }
@@ -251,7 +267,7 @@ public sealed class Display
                 {
                     string mapname = InGame.instance.bridge.GetMapName();
                     Game.instance.GetPlayerProfile().mapInfo.GetMap(mapname).GetBestSocialRound(out string dif, out int round);
-                    text = "Highest Round On Map: " + round;
+                    text = "Highest Round On Map: " + round;                  
                 }
                 else
                 {
