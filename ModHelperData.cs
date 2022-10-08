@@ -2,7 +2,7 @@ namespace Bloontistics;
 
 public static class ModHelperData
 {
-    public const string Version = "1.2.0";
+    public const string Version = "1.3.0";
     public const string Name = "Bloontistics";
 
     public const string Description = "Adds ingame stats.";
